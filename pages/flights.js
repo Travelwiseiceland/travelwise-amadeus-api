@@ -3,10 +3,10 @@ import { useState } from 'react';
 const fetchIATACode = async (city) => {
   const normalize = (str) =>
     str
-      .normalize('NFD')                         // Fjarlægja broddstafi
+      .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
-      .replace(/\b\w/g, l => l.toUpperCase()); // Fyrsti stafur stór
+      .replace(/\b\w/g, l => l.toUpperCase());
 
   const normalizedCity = normalize(city);
 
@@ -30,7 +30,6 @@ const fetchIATACode = async (city) => {
   });
 
   const locationData = await locationRes.json();
-  console.log(`→ IATA fyrir ${city}:`, locationData.data?.[0]?.iataCode);
   return locationData.data?.[0]?.iataCode || '';
 };
 
@@ -50,8 +49,6 @@ export default function Flights() {
       const originCode = await fetchIATACode(origin);
       const destinationCode = await fetchIATACode(destination);
 
-      console.log("🔍 Leita frá:", originCode, "til:", destinationCode, "á dagsetningu:", date);
-
       const res = await fetch('/api/flights', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -67,10 +64,8 @@ export default function Flights() {
       }
 
       const data = await res.json();
-      console.log("📦 Niðurstöður frá Amadeus API:", data);
       setResults(data.data || []);
     } catch (err) {
-      console.error("⚠️ Villa:", err);
       setError(err.message);
     } finally {
       setLoading(false);
