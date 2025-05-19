@@ -1,6 +1,15 @@
 import { useState } from 'react';
 
 const fetchIATACode = async (city) => {
+  const normalize = (str) =>
+    str
+      .normalize('NFD')                         // Fjarlægja broddstafi
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/\b\w/g, l => l.toUpperCase()); // Fyrsti stafur stór
+
+  const normalizedCity = normalize(city);
+
   const tokenRes = await fetch('https://test.api.amadeus.com/v1/security/oauth2/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -14,7 +23,7 @@ const fetchIATACode = async (city) => {
   const tokenData = await tokenRes.json();
   const token = tokenData.access_token;
 
-  const locationRes = await fetch(`https://test.api.amadeus.com/v1/reference-data/locations?keyword=${city}&subType=AIRPORT`, {
+  const locationRes = await fetch(`https://test.api.amadeus.com/v1/reference-data/locations?keyword=${normalizedCity}&subType=AIRPORT`, {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -68,10 +77,24 @@ export default function Flights() {
       <h1>Leita að flugi ✈️</h1>
 
       <div style={{ marginBottom: '1rem' }}>
-        <input placeholder="Frá (borg)" value={origin} onChange={e => setOrigin(e.target.value)} />
-        <input placeholder="Til (borg)" value={destination} onChange={e => setDestination(e.target.value)} />
-        <input type="date" value={date} onChange={e => setDate(e.target.value)} />
-        <button onClick={handleSearch} disabled={loading}>
+        <input
+          placeholder="Frá (borg)"
+          value={origin}
+          onChange={e => setOrigin(e.target.value)}
+          style={{ marginRight: '1rem' }}
+        />
+        <input
+          placeholder="Til (borg)"
+          value={destination}
+          onChange={e => setDestination(e.target.value)}
+          style={{ marginRight: '1rem' }}
+        />
+        <input
+          type="date"
+          value={date}
+          onChange={e => setDate(e.target.value)}
+        />
+        <button onClick={handleSearch} disabled={loading} style={{ marginLeft: '1rem' }}>
           {loading ? 'Leita...' : 'Leita'}
         </button>
       </div>
