@@ -1,4 +1,28 @@
 import { useState } from 'react';
+const fetchIATACode = async (city) => {
+  const tokenRes = await fetch('https://test.api.amadeus.com/v1/security/oauth2/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: process.env.NEXT_PUBLIC_AMADEUS_CLIENT_ID,
+      client_secret: process.env.NEXT_PUBLIC_AMADEUS_CLIENT_SECRET
+    })
+  });
+
+  const tokenData = await tokenRes.json();
+  const token = tokenData.access_token;
+
+  const locationRes = await fetch(`https://test.api.amadeus.com/v1/reference-data/locations?keyword=${city}&subType=AIRPORT`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  const locationData = await locationRes.json();
+  return locationData.data?.[0]?.iataCode || '';
+};
+
 
 export default function Flights() {
   const [origin, setOrigin] = useState('');
@@ -15,11 +39,15 @@ export default function Flights() {
       const res = await fetch('/api/flights', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-  origin: origin.toUpperCase(),
-  destination: destination.toUpperCase(),
+        const originCode = await fetchIATACode(origin);
+const destinationCode = await fetchIATACode(destination);
+
+body: JSON.stringify({
+  origin: originCode,
+  destination: destinationCode,
   date
 })
+
 
       });
 
