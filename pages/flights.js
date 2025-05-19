@@ -15,7 +15,12 @@ export default function Flights() {
       const res = await fetch('/api/flights', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ origin, destination, date })
+        body: JSON.stringify({
+  origin: origin.toUpperCase(),
+  destination: destination.toUpperCase(),
+  date
+})
+
       });
 
       if (!res.ok) {
