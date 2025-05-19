@@ -10,18 +10,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Hardcoded API keys (ekki nota í framleiðslu!)
-    const clientId = 'Aw9nofFUkLNSG4sIrG1LrkrKoGE2A3np';
-    const clientSecret = 'EuhpY8f2qimCwAdd';
-
-    // Sækja OAuth token
     const tokenRes = await fetch('https://test.api.amadeus.com/v1/security/oauth2/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         grant_type: 'client_credentials',
-        client_id: clientId,
-        client_secret: clientSecret,
+        client_id: process.env.NEXT_PUBLIC_AMADEUS_CLIENT_ID,
+        client_secret: process.env.NEXT_PUBLIC_AMADEUS_CLIENT_SECRET,
       }),
     });
 
@@ -32,7 +27,6 @@ export default async function handler(req, res) {
     const tokenData = await tokenRes.json();
     const accessToken = tokenData.access_token;
 
-    // Kalla í flugaleit API
     const flightsRes = await fetch(`https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${origin}&destinationLocationCode=${destination}&departureDate=${date}&adults=1`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
